@@ -1,0 +1,11 @@
+#[link(name="levenshtein",
+       vers="0.1",
+       url="",
+       uuid="")];
+
+#[crate_type = "lib"];
+
+extern mod std;
+
+export levenshtein;
+

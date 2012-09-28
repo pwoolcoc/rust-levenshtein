@@ -1,43 +1,89 @@
-use std;
+use std::map::HashMap;
+use std::time;
+use option::{Some,None};
+
+export edit_distance;
+export edit_distance_str;
 
 fn minimum(args: ~[uint]) -> uint {
-    vec::foldl(uint::max_value, args, |a, b| { uint::min(a, b) })
+    vec::foldl(uint::max_value, args, |a, b| {uint::min(a, b)})
 }
 
-fn distance(s: ~str, t: ~str) -> uint {
-    io::println(fmt!("'%s', '%s'", s, t));
-    let slen = str::len(s);
-    let tlen = str::len(t);
-    let mut cost : uint = 0u;
+fn tail(s: ~str) -> ~str {
+    str::slice(s, 1, str::len(s))
+}
 
-    io::println(fmt!("'%s':%u, '%s':%u", s, slen, t, tlen));
+fn head(s: ~str) -> ~str {
+    if str::len(s) == 0 {
+        ~""
+    } else {
+        str::slice(s, 0, 1)
+    }
+}
 
-    if slen > 0u && tlen > 0u { // not having this here causes bounds check assertion failed
-        if str::slice(s, 0u, 1u) != str::slice(t, 0u, 1u) {
-            cost = 1u;
+fn edit_distance(s: ~[u8], t: ~[u8]) -> uint {
+    edit_distance_str(str::from_bytes(s), str::from_bytes(t))
+}
+
+
+fn edit_distance_str(s: ~str, t: ~str) -> uint {
+    _edit_distance_str(s, t, HashMap())
+}
+
+fn _edit_distance_str(s: ~str, t: ~str, table: HashMap<~str, uint>) -> uint {
+    match table.find(s + t) {
+        Some(value) => { value }
+        None => {
+            let slen = str::len(s);
+            let tlen = str::len(t);
+            let mut cost : uint = 0u;
+            let mut result : uint;
+
+            if head(copy s) != head(copy t) {
+                cost = 1u;
+            }
+
+            if slen == 0u { result = tlen; }
+            else if tlen == 0u { result = slen; }
+            else {
+                result = minimum(
+                      ~[_edit_distance_str(tail(copy s), copy t, table) + 1u,
+                        _edit_distance_str(copy s, tail(copy t), table) + 1u,
+                        _edit_distance_str(tail(copy s), tail(copy t), table) + cost]
+                );
+            }
+
+            table.insert(s + t, result);
+            result
         }
     }
 
-    if slen == 0u { io::println("slen == 0, returning tlen"); return tlen; }
-    else if tlen == 0u { io::println("tlen == 0, returning slen"); return slen; }
-    else { io::println("slen > 0, tlen > 0, returning minimum"); return minimum(
-              ~[distance(copy str::slice(s, 1u, slen - 1u), copy t) + 1u,
-                distance(copy s, copy str::slice(t, 1u, tlen - 1u)) + 1u,
-                distance(copy str::slice(s, 1u, slen - 1u), copy str::slice(t, 1u, tlen - 1u)) + cost]
-            );
-    }
 }
 
-#[test]
-fn test_minimum() {
-    let a = ~[5, 8, 2 , 0];
-    assert 0 == minimum(a);
+fn time_me (blk: fn() -> ()) -> float {
+    let before = time::precise_time_s();
+    blk();
+    let after = time::precise_time_s();
+    after - before
 }
+
 
 #[test]
 fn test_distance() {
     let s = ~"kitten";
     let t = ~"sitting";
-    distance(s, t);
+    assert edit_distance_str(s, t) == 3;
+}
+
+#[test]
+fn test_timing() {
+    let s = ~"kitten";
+    let t = ~"sitting";
+    let runtime = time_me(|| {
+            for iter::repeat(10) {
+                assert edit_distance_str(s,t) == 3;
+            }
+    });
+    io::println(fmt!("total time: %f", runtime));
 }
 
