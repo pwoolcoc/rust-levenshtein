@@ -1,4 +1,4 @@
-use std::map::HashMap;
+use std::map::hashmap;
 use std::time;
 use option::{Some,None};
 
@@ -25,12 +25,11 @@ fn edit_distance(s: ~[u8], t: ~[u8]) -> uint {
     edit_distance_str(str::from_bytes(s), str::from_bytes(t))
 }
 
-
 fn edit_distance_str(s: ~str, t: ~str) -> uint {
-    _edit_distance_str(s, t, HashMap())
+    _edit_distance_str(s, t, hashmap())
 }
 
-fn _edit_distance_str(s: ~str, t: ~str, table: HashMap<~str, uint>) -> uint {
+fn _edit_distance_str(s: ~str, t: ~str, table: hashmap<~str, uint>) -> uint {
     match table.find(s + t) {
         Some(value) => { value }
         None => {
