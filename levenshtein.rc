@@ -1,7 +1,6 @@
 #[link(name="levenshtein",
        vers="0.1",
-       url="",
-       uuid="")];
+       uuid="580f87d6-067c-4a96-9dce-cf5b8ff86f58")];
 
 #[crate_type = "lib"];
 
