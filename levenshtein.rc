@@ -1,9 +1,9 @@
 #[link(name="levenshtein",
        vers="0.1",
+       url="https://github.com/pwoolcoc/rust-levenshtein.git",
        uuid="580f87d6-067c-4a96-9dce-cf5b8ff86f58")];
 
 #[crate_type = "lib"];
 
-extern mod std;
-export levenshtein;
+pub mod levenshtein;
 
